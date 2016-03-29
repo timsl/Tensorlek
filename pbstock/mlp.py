@@ -5,13 +5,14 @@ from pybrain.structure.modules import LinearLayer
 from pybrain.structure.modules import TanhLayer
 from pybrain.structure.connections import FullConnection
 from pybrain.supervised.trainers import BackpropTrainer
+from pybrain.optimization.populationbased.ga import GA
 import matplotlib.pyplot as plt
 import numpy as np
 
 training_range = 1000
 testing_range = 100
 training_start = 500
-n_input = 2
+n_input = 3
 
 
 ds = SupervisedDataSet(n_input, 1) 
@@ -31,7 +32,7 @@ for x in range(0, training_range):
 
 nn = FeedForwardNetwork()
 inLayer = LinearLayer(n_input)
-hiddenLayer = TanhLayer(25)
+hiddenLayer = TanhLayer(3)
 outLayer = LinearLayer(1)
 
 nn.addInputModule(inLayer)
@@ -43,13 +44,15 @@ nn.addConnection(in_to_hidden)
 nn.addConnection(hidden_to_out)
 nn.sortModules()
 
-trainer = BackpropTrainer(nn, ds, learningrate=0.01, momentum=0.1)
+#trainer = BackpropTrainer(nn, ds, learningrate=0.01, momentum=0.1)
+ga = GA(ds.evaluateModuleMSE, nn, minimize=True)
 
-for epoch in range(0, 10000000):
-    if epoch % 1000000 == 0:
-        error = trainer.train()
-        print('Epoch: ', epoch)
-        print('Error: ', error)
+for epoch in range(0, 100):
+    nn = ga.learn(0)[0]
+    print('Epoch: ', epoch)
+   # if epoch % 100 == 0:
+        #error = trainer.train()
+        #print('Error: ', error)
 
 
 result = []
